@@ -339,9 +339,7 @@ var ContinuousLayout = /*#__PURE__*/function () {
       var restartAlphaTarget = Math.abs((this.state.alpha || 1) - (this.state.alphaTarget || 0)) / 3;
       simulation.alphaTarget(restartAlphaTarget).restart();
       s.tick && s.tick(_progress);
-      if (s.animate) {
-        this.refreshPositions(s.nodes, s);
-      }
+      this.refreshPositions(s.nodes, s);
     }
   }, {
     key: "end",

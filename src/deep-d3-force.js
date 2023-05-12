@@ -182,9 +182,7 @@ class ContinuousLayout {
     simulation.alphaTarget(restartAlphaTarget).restart();
 
     s.tick && s.tick(_progress);
-    if (s.animate) {
-      this.refreshPositions(s.nodes, s);
-    }
+    this.refreshPositions(s.nodes, s);
   }
 
   end(destroyed) {
