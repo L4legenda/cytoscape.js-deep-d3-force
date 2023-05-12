@@ -472,11 +472,16 @@ var ContinuousLayout = /*#__PURE__*/function () {
           }
           console.log("_scratch", _scratch);
         };
+        var _cytoscapeDestroyEvent = function _cytoscapeDestroyEvent(e) {
+          simulation.stop();
+        };
         l.removeCytoscapeEvents = function () {
           s.nodes.off('grab free drag lock unlock', _cytoscapeEvent);
+          s.cy.off('destroy', _cytoscapeDestroyEvent);
           l.removeCytoscapeEvents = null;
         };
         s.nodes.on('grab free drag lock unlock', _cytoscapeEvent);
+        s.cy.on('destroy', _cytoscapeDestroyEvent);
       }
       l.ungrabify(s.nodes);
       l.postrun(s);

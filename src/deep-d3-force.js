@@ -309,11 +309,16 @@ class ContinuousLayout {
         }
         console.log("_scratch", _scratch)
       };
+      let _cytoscapeDestroyEvent = function (e) {
+        simulation.stop();
+      }
       l.removeCytoscapeEvents = function () {
         s.nodes.off('grab free drag lock unlock', _cytoscapeEvent);
+        s.cy.off('destroy', _cytoscapeDestroyEvent);
         l.removeCytoscapeEvents = null;
       };
       s.nodes.on('grab free drag lock unlock', _cytoscapeEvent);
+      s.cy.on('destroy', _cytoscapeDestroyEvent);
     }
     l.ungrabify(s.nodes);
 
