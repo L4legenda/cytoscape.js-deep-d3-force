@@ -14,8 +14,8 @@ d3-force for cytoscape.js ([demo](https://shichuanpo.github.io/cytoscape.js-d3-f
 ## Usage instructions
 
 Download the library:
- * via npm: `npm install cytoscape-d3-force`,
- * via bower: `bower install cytoscape-d3-force`, or
+ * via npm: `npm install cytoscape-deep-d3-force`,
+ * via bower: `bower install cytoscape-deep-d3-force`, or
  * via direct download in the repository (probably from a tag).
 
 Import the library as appropriate for your project:
@@ -24,7 +24,7 @@ ES import:
 
 ```js
 import cytoscape from 'cytoscape';
-import d3Force from 'cytoscape-d3-force';
+import d3Force from 'cytoscape-deep-d3-force';
 
 cytoscape.use( d3Force );
 ```
@@ -33,7 +33,7 @@ CommonJS require:
 
 ```js
 let cytoscape = require('cytoscape');
-let d3Force = require('cytoscape-d3-force');
+let d3Force = require('cytoscape-deep-d3-force');
 
 cytoscape.use( d3Force ); // register extension
 ```
@@ -41,7 +41,7 @@ cytoscape.use( d3Force ); // register extension
 AMD:
 
 ```js
-require(['cytoscape', 'cytoscape-d3-force'], function( cytoscape, d3Force ){
+require(['cytoscape', 'cytoscape-deep-d3-force'], function( cytoscape, d3Force ){
   d3Force( cytoscape ); // register extension
 });
 ```
