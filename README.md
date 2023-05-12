@@ -8,6 +8,7 @@ d3-force for cytoscape.js ([demo](https://shichuanpo.github.io/cytoscape.js-d3-f
 ## Dependencies
 
  * Cytoscape.js ^3.2.0
+ * Deep
  * <List your dependencies here please>
 
 
