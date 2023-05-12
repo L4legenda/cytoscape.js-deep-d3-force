@@ -1,5 +1,5 @@
 /**
-* cytoscape-d3-force
+* cytoscape-deep-d3-force
 */
 
 const defaults = require('./defaults');
