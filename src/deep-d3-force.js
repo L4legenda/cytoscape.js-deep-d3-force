@@ -111,11 +111,11 @@ class ContinuousLayout {
     const hasFocusedLink = (node, state) => this.hasFocusedLink(node, state);
     nodes.positions(function (node) {
       let scratch = node.scratch(state.name);
-      if (hasHover(node)) {
+      if (hasHover(node) || hasFocusedLink(node, state)) {
         const { x, y } = node.position();
         assign(scratch, {
           fx: x,
-          fy: y
+          fy: y,
         });
         return { x, y };
       } else if (!hasHover(node) && !hasFocusedLink(node, state)) {
@@ -220,7 +220,6 @@ class ContinuousLayout {
     if (countNodes > 0 && oldCountNodes != countNodes) {
       oldCountNodes = countNodes;
       s.nodes.forEach(n => this.setInitialPositionState(n, s));
-      console.log('l.simulation')
       if (simulation) {
         simulation.stop();
       }
@@ -300,24 +299,23 @@ class ContinuousLayout {
         s.startTime = Date.now();
         _scratch.x = pos.x;
         _scratch.y = pos.y;
-        console.log("hover", e.type, hasHover(node));
-        if (e.type === 'grab' || hasHover(node)) {
+
+        if (e.type === 'grab') {
           simulation.alphaTarget(restartAlphaTarget).restart();
         } else {
           _scratch.fx = pos.x;
           _scratch.fy = pos.y;
         }
-        console.log("_scratch", _scratch)
       };
       let _cytoscapeDestroyEvent = function (e) {
         simulation.stop();
       }
       l.removeCytoscapeEvents = function () {
-        s.nodes.off('grab free drag lock unlock', _cytoscapeEvent);
+        s.nodes.off('grab drag', _cytoscapeEvent);
         s.cy.off('destroy', _cytoscapeDestroyEvent);
         l.removeCytoscapeEvents = null;
       };
-      s.nodes.on('grab free drag lock unlock', _cytoscapeEvent);
+      s.nodes.on('grab drag', _cytoscapeEvent);
       s.cy.on('destroy', _cytoscapeDestroyEvent);
     }
     l.ungrabify(s.nodes);

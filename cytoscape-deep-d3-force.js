@@ -257,7 +257,7 @@ var ContinuousLayout = /*#__PURE__*/function () {
       };
       nodes.positions(function (node) {
         var scratch = node.scratch(state.name);
-        if (hasHover(node)) {
+        if (hasHover(node) || hasFocusedLink(node, state)) {
           var _node$position = node.position(),
             x = _node$position.x,
             y = _node$position.y;
@@ -386,7 +386,6 @@ var ContinuousLayout = /*#__PURE__*/function () {
         s.nodes.forEach(function (n) {
           return _this4.setInitialPositionState(n, s);
         });
-        console.log('l.simulation');
         if (simulation) {
           simulation.stop();
         }
@@ -463,24 +462,22 @@ var ContinuousLayout = /*#__PURE__*/function () {
           s.startTime = Date.now();
           _scratch.x = pos.x;
           _scratch.y = pos.y;
-          console.log("hover", e.type, hasHover(node));
-          if (e.type === 'grab' || hasHover(node)) {
+          if (e.type === 'grab') {
             simulation.alphaTarget(restartAlphaTarget).restart();
           } else {
             _scratch.fx = pos.x;
             _scratch.fy = pos.y;
           }
-          console.log("_scratch", _scratch);
         };
         var _cytoscapeDestroyEvent = function _cytoscapeDestroyEvent(e) {
           simulation.stop();
         };
         l.removeCytoscapeEvents = function () {
-          s.nodes.off('grab free drag lock unlock', _cytoscapeEvent);
+          s.nodes.off('grab drag', _cytoscapeEvent);
           s.cy.off('destroy', _cytoscapeDestroyEvent);
           l.removeCytoscapeEvents = null;
         };
-        s.nodes.on('grab free drag lock unlock', _cytoscapeEvent);
+        s.nodes.on('grab drag', _cytoscapeEvent);
         s.cy.on('destroy', _cytoscapeDestroyEvent);
       }
       l.ungrabify(s.nodes);
