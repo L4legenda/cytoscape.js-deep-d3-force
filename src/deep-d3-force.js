@@ -109,30 +109,35 @@ class ContinuousLayout {
   refreshPositions(nodes, state) {
     const hasHover = (node) => this.hasHover(node);
     const hasFocusedLink = (node, state) => this.hasFocusedLink(node, state);
-    nodes.positions(function (node) {
-      let scratch = node.scratch(state.name);
-      if (hasHover(node) || hasFocusedLink(node, state)) {
-        const { x, y } = node.position();
+    try {
+      nodes.positions(function (node) {
+        let scratch = node.scratch(state.name);
+        if (hasHover(node) || hasFocusedLink(node, state)) {
+          const { x, y } = node.position();
+          assign(scratch, {
+            fx: x,
+            fy: y,
+          });
+          return { x, y };
+        } else if (!hasHover(node) && !hasFocusedLink(node, state)) {
+          assign(scratch, {
+            fx: undefined,
+            fy: undefined
+          });
+        }
         assign(scratch, {
-          fx: x,
-          fy: y,
-        });
-        return { x, y };
-      } else if (!hasHover(node) && !hasFocusedLink(node, state)) {
-        assign(scratch, {
-          fx: undefined,
-          fy: undefined
-        });
-      }
-      assign(scratch, {
-        old_x: scratch.x,
-        old_y: scratch.y,
-      })
-      return {
-        x: scratch.x,
-        y: scratch.y
-      };
-    });
+          old_x: scratch.x,
+          old_y: scratch.y,
+        })
+        return {
+          x: scratch.x,
+          y: scratch.y
+        };
+      });
+    } catch (e) {
+      // console.log(e);
+    }
+
   }
 
   getScratch(el) {
@@ -166,7 +171,7 @@ class ContinuousLayout {
   }
 
   tick(UUIDTick) {
-    if (activeUUIDTick != UUIDTick) {
+    if (activeUUIDTick != UUIDTick || !simulation) {
       return;
     }
     const s = this.state;
@@ -199,8 +204,15 @@ class ContinuousLayout {
     // simulation && simulation.stop();
     const s = this.state;
     // this.destroyedEvent && this.destroyedEvent();
-    (destroyed || !s.infinite) && this.removeCytoscapeEvents && this.removeCytoscapeEvents();
     this.regrabify(s.nodes);
+    (destroyed || !s.infinite) && this.removeCytoscapeEvents && this.removeCytoscapeEvents();
+    if (destroyed) {
+      simulation?.stop && simulation.stop()
+      simulation = null;
+      oldCountNodes = 0;
+      activeUUIDTick = '';
+    }
+
     return this;
   }
   run() {
@@ -221,7 +233,7 @@ class ContinuousLayout {
       oldCountNodes = countNodes;
       s.nodes.forEach(n => this.setInitialPositionState(n, s));
       if (simulation) {
-        simulation.stop();
+        simulation.stop && simulation.stop();
       }
       let _forcenodes = s.nodes.map(n => assign(l.getScratch(n), n.data()));
       let _forceedges = s.edges.map(e => assign({}, e.data()));
@@ -289,6 +301,7 @@ class ContinuousLayout {
     const hasHover = (node) => this.hasHover(node);
     if (!l.removeCytoscapeEvents) {
       let _cytoscapeEvent = function (e) {
+        if (!simulation) return
         let node = this;
         let pos = node.position();
         let nodeIsTarget = e.cyTarget === node || e.target === node;
@@ -307,22 +320,23 @@ class ContinuousLayout {
           _scratch.fy = pos.y;
         }
       };
-      let _cytoscapeDestroyEvent = function (e) {
-        simulation.stop();
-      }
+      // let _cytoscapeDestroyEvent = function (e) {
+      //   simulation?.stop && simulation.stop();
+      // }
       l.removeCytoscapeEvents = function () {
         s.nodes.off('grab drag', _cytoscapeEvent);
-        s.cy.off('destroy', _cytoscapeDestroyEvent);
+        // s.cy.off('destroy', _cytoscapeDestroyEvent);
         l.removeCytoscapeEvents = null;
       };
       s.nodes.on('grab drag', _cytoscapeEvent);
-      s.cy.on('destroy', _cytoscapeDestroyEvent);
+      // s.cy.on('destroy', _cytoscapeDestroyEvent);
     }
     l.ungrabify(s.nodes);
 
     l.postrun(s);
     return this;
   }
+
 
   prerun() { }
   postrun() { }

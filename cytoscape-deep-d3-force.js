@@ -255,35 +255,39 @@ var ContinuousLayout = /*#__PURE__*/function () {
       var hasFocusedLink = function hasFocusedLink(node, state) {
         return _this.hasFocusedLink(node, state);
       };
-      nodes.positions(function (node) {
-        var scratch = node.scratch(state.name);
-        if (hasHover(node) || hasFocusedLink(node, state)) {
-          var _node$position = node.position(),
-            x = _node$position.x,
-            y = _node$position.y;
+      try {
+        nodes.positions(function (node) {
+          var scratch = node.scratch(state.name);
+          if (hasHover(node) || hasFocusedLink(node, state)) {
+            var _node$position = node.position(),
+              x = _node$position.x,
+              y = _node$position.y;
+            assign(scratch, {
+              fx: x,
+              fy: y
+            });
+            return {
+              x: x,
+              y: y
+            };
+          } else if (!hasHover(node) && !hasFocusedLink(node, state)) {
+            assign(scratch, {
+              fx: undefined,
+              fy: undefined
+            });
+          }
           assign(scratch, {
-            fx: x,
-            fy: y
+            old_x: scratch.x,
+            old_y: scratch.y
           });
           return {
-            x: x,
-            y: y
+            x: scratch.x,
+            y: scratch.y
           };
-        } else if (!hasHover(node) && !hasFocusedLink(node, state)) {
-          assign(scratch, {
-            fx: undefined,
-            fy: undefined
-          });
-        }
-        assign(scratch, {
-          old_x: scratch.x,
-          old_y: scratch.y
         });
-        return {
-          x: scratch.x,
-          y: scratch.y
-        };
-      });
+      } catch (e) {
+        // console.log(e);
+      }
     }
   }, {
     key: "getScratch",
@@ -325,7 +329,7 @@ var ContinuousLayout = /*#__PURE__*/function () {
   }, {
     key: "tick",
     value: function tick(UUIDTick) {
-      if (activeUUIDTick != UUIDTick) {
+      if (activeUUIDTick != UUIDTick || !simulation) {
         return;
       }
       var s = this.state;
@@ -357,8 +361,15 @@ var ContinuousLayout = /*#__PURE__*/function () {
       // simulation && simulation.stop();
       var s = this.state;
       // this.destroyedEvent && this.destroyedEvent();
-      (destroyed || !s.infinite) && this.removeCytoscapeEvents && this.removeCytoscapeEvents();
       this.regrabify(s.nodes);
+      (destroyed || !s.infinite) && this.removeCytoscapeEvents && this.removeCytoscapeEvents();
+      if (destroyed) {
+        var _simulation;
+        ((_simulation = simulation) === null || _simulation === void 0 ? void 0 : _simulation.stop) && simulation.stop();
+        simulation = null;
+        oldCountNodes = 0;
+        activeUUIDTick = '';
+      }
       return this;
     }
   }, {
@@ -387,7 +398,7 @@ var ContinuousLayout = /*#__PURE__*/function () {
           return _this4.setInitialPositionState(n, s);
         });
         if (simulation) {
-          simulation.stop();
+          simulation.stop && simulation.stop();
         }
         var _forcenodes = s.nodes.map(function (n) {
           return assign(l.getScratch(n), n.data());
@@ -450,6 +461,7 @@ var ContinuousLayout = /*#__PURE__*/function () {
       };
       if (!l.removeCytoscapeEvents) {
         var _cytoscapeEvent = function _cytoscapeEvent(e) {
+          if (!simulation) return;
           var node = this;
           var pos = node.position();
           var nodeIsTarget = e.cyTarget === node || e.target === node;
@@ -469,17 +481,18 @@ var ContinuousLayout = /*#__PURE__*/function () {
             _scratch.fy = pos.y;
           }
         };
-        var _cytoscapeDestroyEvent = function _cytoscapeDestroyEvent(e) {
-          simulation.stop();
-        };
+        // let _cytoscapeDestroyEvent = function (e) {
+        //   simulation?.stop && simulation.stop();
+        // }
         l.removeCytoscapeEvents = function () {
           s.nodes.off('grab drag', _cytoscapeEvent);
-          s.cy.off('destroy', _cytoscapeDestroyEvent);
+          // s.cy.off('destroy', _cytoscapeDestroyEvent);
           l.removeCytoscapeEvents = null;
         };
         s.nodes.on('grab drag', _cytoscapeEvent);
-        s.cy.on('destroy', _cytoscapeDestroyEvent);
+        // s.cy.on('destroy', _cytoscapeDestroyEvent);
       }
+
       l.ungrabify(s.nodes);
       l.postrun(s);
       return this;
